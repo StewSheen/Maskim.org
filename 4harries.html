@@ -1,7 +1,6 @@
 <html>
 <head>
 <title>Harry</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no">
 </head>
 <body style="
@@ -33,7 +32,7 @@ font-size: 18px; margin: 0px; position: absolute;color: rgb(187, 119, 255);width
     padding: 10px;
     border-radius: 5px;
 ">
-<span onclick="window.open(fburl+encodeURIComponent(location.href),'window','toolbar=no, menubar=no, width=520, height=350, top=100, left=100')" style="cursor: pointer;">
+<span onclick="window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(location.href)}`,'window','toolbar=no, menubar=no, width=520, height=350, top=100, left=100')" style="cursor: pointer;">
 <svg xmlns="http://www.w3.org/2000/svg" width="44" height="44" viewBox="0 0 25 25" fill="#4267b2">
 <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/>
 </svg>
@@ -72,7 +71,7 @@ font-size: 18px; margin: 0px; position: absolute;color: rgb(187, 119, 255);width
     margin: 20px auto;
 "></textarea>
 <button onclick="maskim()">Am I correct?</button>
-<a href="#" onclick="window.location = 'http://maskim.org#' + btoa(document.getElementsByTagName('textarea')[0].value)" style="
+<a href="#" onclick="window.location = `${window.location.protocol}//maskim.org#${btoa(document.getElementsByTagName('textarea')[0].value)}`" style="
     color: #fff;
     position: absolute;
     top: 10px;
@@ -87,20 +86,35 @@ font-size: 18px; margin: 0px; position: absolute;color: rgb(187, 119, 255);width
     left: 0;
 ">&copy; ROBERT</p>
 <script>
-fburl='https://www.facebook.com/sharer/sharer.php?u=';
-$("h1,b,.back,#share").hide();
-$('textarea').val(atob((window.location.hash).replace('#','')));
+document.querySelectorAll("h1,b,.back,#share").forEach(function(element) {
+  element.style.display = "none"
+})
+document.querySelector("textarea").value = atob((window.location.hash).replace('#',''));
 function maskim() {
-	window.location.hash = btoa($('textarea').val());
-	$("h1,b,a,#share").show();
-		$.get("http://ip-api.com/json").always(function(response) {
-		$.ajax({
-			data: {'entry.2114047803': $('textarea').val(),'entry.355390552':response.city+', '+response.regionName+', '+response.country,'entry.1863526735':response.query,'entry.1830903155': 'Yes'},
-			url: 'http://docs.google.com/forms/d/e/1FAIpQLSeXxq-4PnjhGyx0stUi3KJyJCwp2KJugx40zZLY0y-887UvsA/formResponse',
-			method: 'POST', 
-			success: function(msg) {}
-		});
-	});
+  window.location.hash = btoa(document.querySelector('textarea').value);
+  document.querySelectorAll("h1,b,a,#share").forEach(function(element) {
+    element.style.display = "block"
+  })
+  var ssl = window.location.protocol === 'https:'
+  var ipUrl = ssl ? 'https://ipapi.co' : 'http://ip-api.com/json'
+  fetch(`${ipUrl}/json`)
+    .then(response => response.json())
+    .then(data => {
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", `${window.location.protocol}//docs.google.com/forms/d/e/1FAIpQLSeXxq-4PnjhGyx0stUi3KJyJCwp2KJugx40zZLY0y-887UvsA/formResponse`, true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          // success
+        }
+      };
+      var textareaVal = document.querySelector('textarea').value;
+      var regionName = ssl ? data.region : data.regionName
+      var country = ssl ? data.country_name : data.country 
+      var query = ssl ? data.ip : data.query
+      var payload = `entry.2114047803=${textareaVal}&entry.355390552=${data.city}, ${regionName}, ${country}&entry.1863526735=${query}&entry.1830903155=Yes`
+      xhr.send(payload);
+    });
 }
 function addHrefToClipboard() {
    const dummy = document.createElement("input");
