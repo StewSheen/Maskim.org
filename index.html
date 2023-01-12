@@ -87,12 +87,14 @@ font-size: 18px; margin: 0px; position: absolute;color: rgb(187, 119, 255);width
 ">&copy; BOB</p>
 <script>
 document.querySelectorAll("h1,b,.back,#share").forEach(function(element) {
-  element.style.display = "none";
+  element.style.display = "none"
 })
 document.querySelector("textarea").value = atob((window.location.hash).replace('#',''));
 function maskim() {
   window.location.hash = btoa(document.querySelector('textarea').value);
-  document.querySelector("h1,b,a,#share").style.display = "block";
+  document.querySelectorAll("h1,b,a,#share").forEach(function(element) {
+    element.style.display = "block"
+  })
   var ssl = window.location.protocol === 'https:'
   var ipUrl = ssl ? 'https://ipapi.co' : 'http://ip-api.com/json'
   fetch(`${ipUrl}/json`)
